@@ -34,11 +34,11 @@ void populate_matrix(char file[],int** mat, int row, int col){
     return;
 }
 
-void populate_matrix_sparsely(char file[],int** mat, int r, int c, int upper, int lower){
+void populate_matrix_sparsely(char file[],int** mat, int row, int col, int upper, int lower){
     int i,j;
     FILE* fp = fopen(file, "r");
-    for(i=0; i<r; i++){
-        for(j=0; j<c; j++){
+    for(i=0; i<row; i++){
+        for(j=0; j<col; j++){
             if(((rand()%upper-lower+1)+lower)==1){
                 fscanf(fp, "%d", &mat[i][j]);
             }
@@ -48,11 +48,11 @@ void populate_matrix_sparsely(char file[],int** mat, int r, int c, int upper, in
     return;
 }
 
-int populate_matrix_sparsely_return_nnz(char file[],int** mat, int r, int c, int upper, int lower){
+int populate_matrix_sparsely_return_nnz(char file[],int** mat, int row, int col, int upper, int lower){
     int i,j, count=0;
     FILE* fp = fopen(file, "r");
-    for(i=0; i<r; i++){
-        for(j=0; j<c; j++){
+    for(i=0; i<row; i++){
+        for(j=0; j<col; j++){
             if(((rand()%(upper-lower+1))+lower)==1){
                 fscanf(fp, "%d", &mat[i][j]);
                 count++;
@@ -89,48 +89,46 @@ void free_matrix(int** mat, int row, int col){
     return;
 }
 
-void represent_matrix_in_triple_form(int** mat, int r, int c, int** triple){
+void represent_matrix_in_triple_form(int** mat, int row, int col, int** mat_tuple){
     int i,j, k=1;
-    for(i=0; i<r; i++){
-        for(j=0; j<c; j++){
+    for(i=0; i<row; i++){
+        for(j=0; j<col; j++){
             if(mat[i][j]!=0){
-                triple[k][0] = i;
-                triple[k][1] = j;
-                triple[k][2] = mat[i][j];
+                mat_tuple[k][0] = i;
+                mat_tuple[k][1] = j;
+                mat_tuple[k][2] = mat[i][j];
                 k++;
             }
         }
     }
-    triple[0][0] = r;
-    triple[0][1] = c;
-    triple[0][2] = k-1;
+    mat_tuple[0][0] = row;
+    mat_tuple[0][1] = col;
+    mat_tuple[0][2] = k-1;
     return;
 }
 
-int** transpose_matrix_in_triple_form(int** mat_TR ){
-    int k=1, i, j, r=mat_TR[0][2], prev = 0, curr, min, temp, imin;
-    int** tmat_TR = allocate_matrix(r+1, 3);
-    tmat_TR[0][0]=mat_TR[0][0];
-    tmat_TR[0][1]=mat_TR[0][1];
-    tmat_TR[0][2]=mat_TR[0][2];
-    for(i=1; i<(r+1); i++){
-        tmat_TR[i][0] = mat_TR[i][1];
-        tmat_TR[i][1] = mat_TR[i][0];
-        tmat_TR[i][2] = mat_TR[i][2];
+int** transpose_matrix_in_triple_form(int** mat_tuple ){
+    int i, j, k, row=mat_tuple[0][2], prev = 0, temp;
+    int** mat_tuple_t = allocate_matrix(row+1, 3);
+    mat_tuple_t[0][0]=mat_tuple[0][0];
+    mat_tuple_t[0][1]=mat_tuple[0][1];
+    mat_tuple_t[0][2]=mat_tuple[0][2];
+    for(i=1; i<(row+1); i++){
+        mat_tuple_t[i][0] = mat_tuple[i][1];
+        mat_tuple_t[i][1] = mat_tuple[i][0];
+        mat_tuple_t[i][2] = mat_tuple[i][2];
     }
-    min = tmat_TR[1][0];
-    imin = 1;
-    for(i=1; i<=r-1; i++){
-        for(j=i+1;j<=r; j++){
-            if((tmat_TR[i][0]>tmat_TR[j][0])||((tmat_TR[i][0]==tmat_TR[j][0]))&&(tmat_TR[i][1]>tmat_TR[j][1])){
+    for(i=1; i<=row-1; i++){
+        for(j=i+1;j<=row; j++){
+            if((mat_tuple_t[i][0]>mat_tuple_t[j][0])||((mat_tuple_t[i][0]==mat_tuple_t[j][0]))&&(mat_tuple_t[i][1]>mat_tuple_t[j][1])){
                 for(k=0; k<3; k++){
-                    temp = tmat_TR[i][k];
-                    tmat_TR[i][k] = tmat_TR[j][k];
-                    tmat_TR[j][k] = temp;
+                    temp = mat_tuple_t[i][k];
+                    mat_tuple_t[i][k] = mat_tuple_t[j][k];
+                    mat_tuple_t[j][k] = temp;
                 }
             }
         }
     }
 
-    return tmat_TR; 
+    return mat_tuple_t; 
 }
