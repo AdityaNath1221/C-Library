@@ -3,6 +3,15 @@
 #include <time.h>
 #include "matrix.h"
 
+matrix create_matrix(int row, int col, int isSparse){
+    matrix m;
+    m.row = row;
+    m.col = col;
+    m.isSparse = isSparse;
+    allocate_matrix(&m);
+    return m;
+}
+
 void allocate_matrix(matrix* m){
     int i, **mat;
     mat = (int**) malloc( m->row * sizeof(int*));
@@ -36,7 +45,7 @@ int populate_matrix(matrix a, int percent, int ul, int ll){
 }
 
 matrix add_matrices(matrix a, matrix b){
-    int i, j, k;
+    int i, j;
     matrix r;
     if((a.row!=b.row)||(a.col!=b.col)){
         printf("Matrix addition not possible");
@@ -54,7 +63,7 @@ matrix add_matrices(matrix a, matrix b){
 }
 
 matrix subtract_matrices(matrix a, matrix b){
-    int i, j, k;
+    int i, j;
     matrix r;
     if((a.row!=b.row)||(a.col!=b.col)){
         printf("Matrix subtraction not possible");
