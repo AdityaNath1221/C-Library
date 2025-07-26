@@ -1,134 +1,126 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "matrix.h"
 
-int** allocate_matrix(int row, int col){
-    int** mat;
-    int i;
-    mat = (int**) malloc(row*sizeof(int*));
-    for(i=0; i<row; i++){
-        mat[i] = (int*) malloc(col*sizeof(int));
+void allocate_matrix(matrix* m){
+    int i, **mat;
+    mat = (int**) malloc( m->row * sizeof(int*));
+    for(i=0; i<m->row; i++){
+        mat[i] = (int*) calloc(m->col,sizeof(int));
     }
-    return mat;
-}
-
-int** allocate_matrix_to_zero(int row, int col){
-    int** mat;
-    int i;
-    mat = (int**) malloc(row*sizeof(int*));
-    for(i=0; i<row; i++){
-        mat[i] = (int*) calloc(col,sizeof(int));
-    }
-    return mat;
-}
-
-void populate_matrix(char file[],int** mat, int row, int col){
-    int i,j;
-    FILE* fp = fopen(file, "r");
-    for(i=0; i<row; i++){
-        for(j=0; j<col; j++){
-            fscanf(fp, "%d", &mat[i][j]);
-        }
-    }
-    fclose(fp);
+    m->data = mat;
     return;
 }
 
-void populate_matrix_sparsely(char file[],int** mat, int row, int col, int upper, int lower){
-    int i,j;
-    FILE* fp = fopen(file, "r");
-    for(i=0; i<row; i++){
-        for(j=0; j<col; j++){
-            if(((rand()%upper-lower+1)+lower)==1){
-                fscanf(fp, "%d", &mat[i][j]);
-            }
-        }
-    }
-    fclose(fp);
-    return;
-}
-
-int populate_matrix_sparsely_return_nnz(char file[],int** mat, int row, int col, int upper, int lower){
+int populate_matrix(matrix a, int percent, int ul, int ll){
     int i,j, count=0;
-    FILE* fp = fopen(file, "r");
-    for(i=0; i<row; i++){
-        for(j=0; j<col; j++){
-            if(((rand()%(upper-lower+1))+lower)==1){
-                fscanf(fp, "%d", &mat[i][j]);
-                count++;
+    if(a.isSparse){
+        for(i=0; i<a.row; i++){
+            for(j=0; j<a.col; j++){
+                if((rand()%100)<(100-percent)){
+                    a.data[i][j] = rand()%(ul-ll+1)+ll;
+                    count++;
+                }
             }
-        }
     }
-    fclose(fp);
-    return count;
+    }
+    else{
+        for(i=0; i<a.row; i++){
+            for(j=0; j<a.col; j++){
+                a.data[i][j] = rand()%(ul-ll+1)+ll;
+            }
+    }
+    }
+    return a.isSparse ? count:0 ;
 }
 
-int** matrix_multiplication(int** mat1, int r1, int c1, int**mat2, int r2, int c2){
-    int i, j, k, **r;
-    if(c1!=r2){
+matrix add_matrices(matrix a, matrix b){
+    int i, j, k;
+    matrix r;
+    if((a.row!=b.row)||(a.col!=b.col)){
+        printf("Matrix addition not possible");
+        exit(0);
+    }
+    r.row = a.row;
+    r.col = b.col;
+    allocate_matrix(&r);
+    for(i=0; i<r.row; i++){
+        for (j=0; j<r.col; j++){
+                r.data[i][j]=a.data[i][j]+b.data[i][j];
+        }        
+    }
+    return r;
+}
+
+matrix subtract_matrices(matrix a, matrix b){
+    int i, j, k;
+    matrix r;
+    if((a.row!=b.row)||(a.col!=b.col)){
+        printf("Matrix subtraction not possible");
+        exit(0);
+    }
+    r.row = a.row;
+    r.col = b.col;
+    allocate_matrix(&r);
+    for(i=0; i<r.row; i++){
+        for (j=0; j<r.col; j++){
+                r.data[i][j]=a.data[i][j]-b.data[i][j];
+        }        
+    }
+    return r;
+}
+
+matrix multiply_matrices(matrix a, matrix b){
+    int i, j, k;
+    matrix r;
+    if(a.col!=b.row){
         printf("Matrix multiplication not possible");
         exit(0);
     }
-    r = allocate_matrix_to_zero(r1,c2);
-    for(i=0; i<r1; i++){
-        for (j=0; j<c2; j++){
-            for(k=0; k<r2; k++){
-                r[i][j]+=mat1[i][k]*mat2[k][j];
+    r.row = a.row;
+    r.col = b.col;
+    allocate_matrix(&r);
+    for(i=0; i<r.row; i++){
+        for (j=0; j<r.col; j++){
+            for(k=0; k<a.col; k++){
+                r.data[i][j]+=a.data[i][k]*b.data[k][j];
             }
         }        
     }
     return r;
 }
 
-void free_matrix(int** mat, int row, int col){
+matrix transpose_matrix(matrix a){
+    int i, j, k;
+    matrix r;
+    r.row = a.col;
+    r.col = a.row;
+    allocate_matrix(&r);
+    for(i=0; i<a.row; i++){
+        for (j=0; j<a.col; j++){
+            r.data[j][i]=a.data[i][j];
+        }        
+    }
+    return r;
+}
+
+void print_matrix(matrix a){
+    int i, j;
+    for(i=0; i<a.row; i++){
+        for(j=0; j<a.col; j++){
+            printf("%d ", a.data[i][j]);
+        }
+        printf("\n");
+    }
+    return;
+}
+
+void free_matrix(matrix m){
     int i;
-    for(i=0; i<row; i++){
-        free(mat[i]);
+    for(i=0; i<m.row; i++){
+        free(m.data[i]);
     }
-    free(mat);
+    free(m.data);
     return;
-}
-
-void represent_matrix_in_triple_form(int** mat, int row, int col, int** mat_tuple){
-    int i,j, k=1;
-    for(i=0; i<row; i++){
-        for(j=0; j<col; j++){
-            if(mat[i][j]!=0){
-                mat_tuple[k][0] = i;
-                mat_tuple[k][1] = j;
-                mat_tuple[k][2] = mat[i][j];
-                k++;
-            }
-        }
-    }
-    mat_tuple[0][0] = row;
-    mat_tuple[0][1] = col;
-    mat_tuple[0][2] = k-1;
-    return;
-}
-
-int** transpose_matrix_in_triple_form(int** mat_tuple ){
-    int i, j, k, row=mat_tuple[0][2], prev = 0, temp;
-    int** mat_tuple_t = allocate_matrix(row+1, 3);
-    mat_tuple_t[0][0]=mat_tuple[0][0];
-    mat_tuple_t[0][1]=mat_tuple[0][1];
-    mat_tuple_t[0][2]=mat_tuple[0][2];
-    for(i=1; i<(row+1); i++){
-        mat_tuple_t[i][0] = mat_tuple[i][1];
-        mat_tuple_t[i][1] = mat_tuple[i][0];
-        mat_tuple_t[i][2] = mat_tuple[i][2];
-    }
-    for(i=1; i<=row-1; i++){
-        for(j=i+1;j<=row; j++){
-            if((mat_tuple_t[i][0]>mat_tuple_t[j][0])||((mat_tuple_t[i][0]==mat_tuple_t[j][0]))&&(mat_tuple_t[i][1]>mat_tuple_t[j][1])){
-                for(k=0; k<3; k++){
-                    temp = mat_tuple_t[i][k];
-                    mat_tuple_t[i][k] = mat_tuple_t[j][k];
-                    mat_tuple_t[j][k] = temp;
-                }
-            }
-        }
-    }
-
-    return mat_tuple_t; 
 }
