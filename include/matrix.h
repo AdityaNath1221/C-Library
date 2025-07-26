@@ -8,7 +8,8 @@ typedef struct{
     int isSparse;
 }matrix;
 
-void allocate_matrix(matrix* m);\
+matrix create_matrix(int row, int col, int isSparse);
+void allocate_matrix(matrix* m);
 int populate_matrix(matrix a, int percent, int ul, int ll);
 matrix add_matrices(matrix a, matrix b);
 matrix subtract_matrices(matrix a, matrix b);
