@@ -4,7 +4,7 @@
 #include "matrix.h"
 #include "tuple.h"
 
-void initialize_tuple(tuple* t, int nnz){
+void init_tuple(tuple* t, int nnz){
     t->NNZ = nnz;
     int i, j;
     t->data = (int**) malloc((nnz+1)*sizeof(int*));
@@ -14,7 +14,7 @@ void initialize_tuple(tuple* t, int nnz){
     return;
 }
 
-void populate_tuple(tuple* t, matrix m){
+void fill_tuple(tuple* t, matrix m){
     int i, j, k=1;
     t->data[0][0] = m.row;
     t->data[0][1] = m.col;
@@ -46,7 +46,7 @@ void print_tuple(tuple t){
 tuple transpose_tuple(tuple t){
     tuple n;
     int i, j, k, row = t.NNZ, temp;
-    initialize_tuple(&n, t.NNZ);
+    init_tuple(&n, t.NNZ);
     n.data[0][0] = t.data[0][0];
     n.data[0][1] = t.data[0][1];
     n.data[0][2] = t.data[0][2];
