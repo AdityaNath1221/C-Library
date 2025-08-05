@@ -1,7 +1,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-typedef struct{
+typedef struct matrix{
     int row;
     int col;
     int **data;
