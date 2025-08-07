@@ -3,18 +3,22 @@
 #include <limits.h>
 #include "stackArray.h"
 
-#define SIZE 5
+#define ERROR1 -9999  // Underflow Error
+#define ERROR2 -1    // Memory Allocation Error
+#define ERROR3 -9998 // Overflow Error
 #define ERROR INT_MIN
 
-int initialize_stack(stack* s){
+int initialize_stack(stack* s, int size){
     s->top = -1;
-    s->st = (int*) malloc(SIZE*sizeof(int));
+    s->size = size;
+    s->st = (int*) malloc(size*sizeof(int));
     if(s->st == NULL){
-        printf("STACK ERROR: Memory could not be allocated for stack.\n");
-        return 0;
+        return ERROR2;
     }
     return 1;
 }
+
+/*      0 = true 1 = false     */
 
 int isEmpty(stack s){
     if(s.top==-1)
@@ -24,16 +28,15 @@ int isEmpty(stack s){
 }
 
 int isFull(stack s){
-    if(s.top==SIZE-1)
+    if(s.top==s.size-1)
         return 1;
     else    
         return 0;
 }
 
 int push(stack* s, int data){
-    if(!isFull){
-        printf("OVERFLOW ERROR: Stack Full.\n");
-        return 0;
+    if(isFull(*s)){
+        return ERROR3;
     }
     s->top++;
     s->st[s->top] = data;
@@ -41,9 +44,8 @@ int push(stack* s, int data){
 }
 
 int pop(stack* s){
-    if(!isEmpty){
-        printf("UNDERFLOW ERROR: Stack Empty.\n");
-        return ERROR;
+    if(isEmpty(*s)){
+        return ERROR1;
     }
     int temp = s->st[s->top];
     s->top--;
@@ -51,9 +53,8 @@ int pop(stack* s){
 }
 
 int peek(stack s){
-    if(!isEmpty){
-        printf("STACK ERROR: No elements in stack.\n");
-        return ERROR;
+    if(isEmpty(s)){
+        return ERROR1;
     }
     return(s.st[s.top]);
 }

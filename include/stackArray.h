@@ -4,9 +4,10 @@
 typedef struct stack{
     int* st;
     int top;
+    short int size;
 }stack;
 
-int initialize_stack(stack* s);
+int initialize_stack(stack* s, int size);
 int isEmpty(stack s);
 int isFull(stack s);
 int push(stack* s, int data);
